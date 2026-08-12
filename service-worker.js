@@ -19,6 +19,7 @@ const APP_SHELL = [
   "./render.js",
   "./main.js",
   "./sw-register.js",
+  "./install-prompt.js",
   "./manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png",

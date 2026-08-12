@@ -53,6 +53,15 @@
     </div>
   </div>
 
+  <!-- Install prompt (Android/Chrome only — iOS has no such API) -->
+  <div id="install-banner" class="install-banner" hidden>
+    <span>Install this app for quick access at the cabin.</span>
+    <span class="install-banner-actions">
+      <button type="button" id="install-btn" class="btn-primary small">Install</button>
+      <button type="button" id="install-dismiss-btn" class="icon-btn" aria-label="Dismiss">&times;</button>
+    </span>
+  </div>
+
   <!-- Update available banner -->
   <div id="update-banner" class="update-banner" hidden>
     <span>A new version is available.</span>
@@ -67,5 +76,6 @@
   <script src="render.js"></script>
   <script src="main.js"></script>
   <script src="sw-register.js"></script>
+  <script src="install-prompt.js"></script>
 </body>
 </html>

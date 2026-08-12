@@ -460,6 +460,38 @@ a:focus-visible {
   padding: 8px 12px;
 }
 
+/* ---------- Install banner ---------- */
+.install-banner {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 76px; /* stacked above the update banner, in case both ever show at once */
+  background: var(--brass);
+  color: var(--pine);
+  padding: 12px 14px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+  z-index: 199;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.install-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.install-banner .icon-btn {
+  color: var(--pine);
+  padding: 4px;
+}
+
 /* ---------- Update banner / sync toast ---------- */
 .update-banner {
   position: fixed;

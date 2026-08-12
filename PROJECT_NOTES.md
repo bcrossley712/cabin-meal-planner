@@ -113,6 +113,13 @@ not the public — low-stakes threat model, no need for real accounts.
   `navigator.onLine` / `online`/`offline` events — not bulletproof
   (reflects "has a network interface," not "internet actually
   reachable"), but adequate for "no signal at a cabin."
+- **Custom Android install banner, no iOS equivalent (can't have one).**
+  `install-prompt.js` hooks Chrome's `beforeinstallprompt` event to show
+  a styled banner instead of Chrome's default mini-infobar. iOS Safari
+  has no install API at all — "Add to Home Screen" there is a manual
+  Share-sheet action a web page can't trigger or detect, so there's
+  nothing to build for it. Dismissing the banner (or installing) sets a
+  `localStorage` flag so it doesn't re-nag on every visit.
 - **Single source icon, generated into the full platform set.** One
   master image (1024×1024+) gets exported to: `apple-touch-icon.png`
   (180×180, iOS home screen), manifest icons at 192×192 and 512×512
