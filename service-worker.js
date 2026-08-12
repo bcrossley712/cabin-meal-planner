@@ -57,7 +57,16 @@ self.addEventListener("fetch", (event) => {
     caches.match(req).then((cached) => {
       const network = fetch(req)
         .then((res) => {
-          if (res.ok) caches.open(CACHE_NAME).then((cache) => cache.put(req, res.clone()));
+          // Clone immediately, synchronously, on receipt — not deferred
+          // inside caches.open().then(). By the time that nested callback
+          // ran, the browser had often already started reading res's body
+          // to render the page, which locks it and makes .clone() throw
+          // "Response body is already used." Clone first, use the clone
+          // for caching, return the original untouched.
+          const resClone = res.clone();
+          if (res.ok) {
+            caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
+          }
           return res;
         })
         .catch(() => cached);
