@@ -7,7 +7,7 @@ compatibility_date = "2025-01-01"
 # it will print an "id" to paste below.
 [[kv_namespaces]]
 binding = "CABIN_KV"
-id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+id = "41c9a41ec85c43d4839878df46ca26f2"
 
 # Optional: restrict CORS to your real GitHub Pages origin once deployed.
 # Leave commented out (defaults to "*") until you know the exact URL.

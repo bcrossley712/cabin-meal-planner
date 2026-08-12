@@ -4,7 +4,7 @@
  *
  * >>> EDIT THIS after you deploy the Worker (see /cf-worker/README.md): <<<
  */
-const API_BASE_URL = "https://cabin-meal-planner.YOUR-SUBDOMAIN.workers.dev";
+const API_BASE_URL = "https://cabin-meal-planner.bcrossley712.workers.dev";
 
 /**
  * Data shape returned by the Worker and cached locally:
