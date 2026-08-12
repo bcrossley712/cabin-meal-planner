@@ -1,0 +1,44 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Stamp service worker version
+        # Replaces the __VERSION__ placeholder with this commit's SHA, so
+        # the service worker's cache name changes on every real deploy —
+        # that's what makes already-installed devices notice an update.
+        # cf-worker/ is the backend and isn't part of the deployed site.
+        run: |
+          mkdir -p site
+          rsync -a --exclude 'cf-worker' --exclude '.github' ./ site/
+          sed -i "s/__VERSION__/${GITHUB_SHA}/" site/service-worker.js
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

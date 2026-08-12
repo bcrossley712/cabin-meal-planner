@@ -1,0 +1,8 @@
+# Cloudflare Worker local tooling
+cf-worker/node_modules/
+cf-worker/.wrangler/
+cf-worker/.dev.vars
+
+# OS cruft
+.DS_Store
+Thumbs.db

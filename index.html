@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Cabin Meal Planner</title>
+
+<meta name="theme-color" content="#1C2620" />
+<meta name="description" content="Plan meals and coordinate who's bringing what for family cabin trips." />
+
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icons/favicon.svg" type="image/svg+xml" />
+<link rel="alternate icon" href="icons/favicon.ico" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Cabin Meals" />
+
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div id="app"></div>
+
+  <!-- Passcode modal -->
+  <div id="passcode-modal" class="modal-overlay" hidden>
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Unlock editing</h3>
+        <button type="button" class="icon-btn" data-action="close-passcode" aria-label="Close">&times;</button>
+      </div>
+      <p class="modal-text">Enter the family passcode. This device will remember it.</p>
+      <input id="passcode-input" type="password" class="text-input dark" placeholder="Passcode" autocomplete="off" />
+      <p id="passcode-error" class="error-text" hidden>That's not it — try again.</p>
+      <button type="button" class="btn-primary full-width" data-action="submit-passcode">Unlock</button>
+    </div>
+  </div>
+
+  <!-- Confirm modal -->
+  <div id="confirm-modal" class="modal-overlay" hidden>
+    <div class="modal-card">
+      <h3 id="confirm-title"></h3>
+      <p id="confirm-message" class="modal-text"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" data-action="cancel-confirm">Cancel</button>
+        <button type="button" class="btn-danger" data-action="do-confirm">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Update available banner -->
+  <div id="update-banner" class="update-banner" hidden>
+    <span>A new version is available.</span>
+    <button type="button" id="update-refresh-btn" class="btn-primary small">Refresh</button>
+  </div>
+
+  <!-- Sync status toast -->
+  <div id="sync-toast" class="sync-toast" hidden></div>
+
+  <script src="storage.js"></script>
+  <script src="api.js"></script>
+  <script src="render.js"></script>
+  <script src="main.js"></script>
+  <script src="sw-register.js"></script>
+</body>
+</html>

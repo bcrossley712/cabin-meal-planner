@@ -1,0 +1,18 @@
+name = "cabin-meal-planner"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+# Fill in after creating the KV namespace (see README.md):
+#   wrangler kv namespace create CABIN_KV
+# it will print an "id" to paste below.
+[[kv_namespaces]]
+binding = "CABIN_KV"
+id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+
+# Optional: restrict CORS to your real GitHub Pages origin once deployed.
+# Leave commented out (defaults to "*") until you know the exact URL.
+# [vars]
+# ALLOWED_ORIGIN = "https://yourusername.github.io"
+
+# FAMILY_PASSCODE is a secret, not a var — never commit it here.
+# Set it with: wrangler secret put FAMILY_PASSCODE
