@@ -454,7 +454,12 @@ function updateOnlineStatus() {
 /* ---------------- Init ---------------- */
 
 async function init() {
-  document.getElementById("app").addEventListener("click", handleAppClick);
+  // Click delegation is on document.body, not #app: the passcode and
+  // confirm modals live outside #app on purpose (renderApp() replaces
+  // #app's entire innerHTML on every render, which would wipe out a modal
+  // mid-use if it lived inside). #app alone would miss clicks on those
+  // modals entirely — this bit us once already, don't re-narrow it.
+  document.body.addEventListener("click", handleAppClick);
   document.getElementById("app").addEventListener("input", handleAppInput);
   document.getElementById("app").addEventListener("keydown", handleAppKeydown);
   document.getElementById("passcode-input").addEventListener("keydown", handleAppKeydown);

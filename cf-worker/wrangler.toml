@@ -12,7 +12,7 @@ id = "41c9a41ec85c43d4839878df46ca26f2"
 # Optional: restrict CORS to your real GitHub Pages origin once deployed.
 # Leave commented out (defaults to "*") until you know the exact URL.
 # [vars]
-# ALLOWED_ORIGIN = "https://yourusername.github.io"
+# ALLOWED_ORIGIN = "https://bcrossley712.github.io/cabin-meal-planner/"
 
 # FAMILY_PASSCODE is a secret, not a var — never commit it here.
 # Set it with: wrangler secret put FAMILY_PASSCODE
