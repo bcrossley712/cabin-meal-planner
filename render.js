@@ -23,11 +23,26 @@ function formatDate(iso) {
     .toUpperCase();
 }
 
-function lockToggleHTML(unlocked, compact) {
-  const label = compact ? "" : unlocked ? "Editing" : "Locked";
+// Editing requires both: passcode unlocked on this device, AND a
+// connection (offline is always view-only, regardless of lock state —
+// see PROJECT_NOTES.md "Offline behavior").
+function canEdit(state) {
+  return state.unlocked && state.online;
+}
+
+function lockToggleHTML(state, compact) {
+  const { unlocked, online } = state;
+  const showUnlocked = unlocked && online;
+  let label = "Locked";
+  if (compact) label = "";
+  else if (!online) label = "Offline";
+  else if (unlocked) label = "Editing";
+
   return `
-    <button type="button" class="lock-toggle ${unlocked ? "unlocked" : ""}" data-action="toggle-lock">
-      <span aria-hidden="true">${unlocked ? "🔓" : "🔒"}</span>
+    <button type="button" class="lock-toggle ${showUnlocked ? "unlocked" : ""}" data-action="toggle-lock" ${
+    online ? "" : "disabled"
+  }>
+      <span aria-hidden="true">${showUnlocked ? "🔓" : "🔒"}</span>
       ${label ? `<span>${label}</span>` : ""}
     </button>`;
 }
@@ -62,7 +77,7 @@ function renderTripList(state) {
           </span>
         </button>
         ${
-          state.unlocked
+          canEdit(state)
             ? `<button type="button" class="icon-btn danger-hover" data-action="delete-trip" data-trip-id="${t.id}" aria-label="Delete trip">🗑</button>`
             : ""
         }
@@ -83,7 +98,7 @@ function renderTripList(state) {
     <div class="screen-pad">
       <div class="topbar" style="padding:4px 0 0;">
         <p class="eyebrow" style="margin:0;">CABIN LOGBOOK</p>
-        ${lockToggleHTML(state.unlocked, false)}
+        ${lockToggleHTML(state, false)}
       </div>
       <h1 class="topbar-title" style="margin:4px 0 20px;">Your trips</h1>
 
@@ -99,7 +114,7 @@ function renderTripScreen(state, trip) {
     ? days.map((day) => renderDayCard(state, day)).join("")
     : `<p class="empty-state">No days added yet.</p>`;
 
-  const addDay = state.unlocked
+  const addDay = canEdit(state)
     ? `
       <div>
         <label for="new-day-date" style="font-size:13px; color:var(--muted-on-dark); display:block; margin-bottom:6px;">
@@ -115,11 +130,11 @@ function renderTripScreen(state, trip) {
       <h1 class="trip-title">${escapeHtml(trip.name)}</h1>
       <div class="trip-header-actions">
         ${
-          state.unlocked
+          canEdit(state)
             ? `<button type="button" class="icon-btn danger-hover" data-action="delete-trip" data-trip-id="${trip.id}" aria-label="Delete trip">🗑</button>`
             : ""
         }
-        ${lockToggleHTML(state.unlocked, true)}
+        ${lockToggleHTML(state, true)}
       </div>
     </div>
     <div class="screen-pad">
@@ -135,7 +150,7 @@ function renderDayCard(state, day) {
   const mealCards = meals.map((m) => renderMealCard(state, day, m)).join("");
 
   const addingMeal = state.ui.addingMealDayIds.has(day.id);
-  const addMealForm = state.unlocked
+  const addMealForm = canEdit(state)
     ? addingMeal
       ? `
         <div class="inline-form pad-top">
@@ -156,7 +171,7 @@ function renderDayCard(state, day) {
         <span class="day-card-header-right">
           <span class="meal-count">${meals.length} meal${meals.length !== 1 ? "s" : ""}</span>
           ${
-            state.unlocked
+            canEdit(state)
               ? `<span class="icon-btn danger-hover" role="button" tabindex="0" data-action="delete-day" data-day-id="${day.id}" aria-label="Delete day" style="padding:4px;">🗑</span>`
               : ""
           }
@@ -175,7 +190,7 @@ function renderMealCard(state, day, meal) {
   const rows = meal.ingredients.map((ing) => renderIngredientRow(state, day, meal, ing)).join("");
 
   const addingIng = state.ui.addingIngredientMealIds.has(meal.id);
-  const addIngForm = state.unlocked
+  const addIngForm = canEdit(state)
     ? addingIng
       ? `
         <div class="inline-form pad-top">
@@ -201,7 +216,7 @@ function renderMealCard(state, day, meal) {
               : ""
           }
           ${
-            state.unlocked
+            canEdit(state)
               ? `<span class="icon-btn danger-hover" role="button" tabindex="0" style="padding:4px; color:#8A7F6C;" data-action="delete-meal" data-meal-id="${meal.id}" data-day-id="${day.id}" aria-label="Delete meal">🗑</span>`
               : ""
           }
@@ -226,7 +241,7 @@ function renderIngredientRow(state, day, meal, ing) {
           class="assignee-input"
           value="${escapeHtml(ing.assignee || "")}"
           placeholder="who's bringing?"
-          ${state.unlocked ? "" : "disabled"}
+          ${canEdit(state) ? "" : "disabled"}
           data-action="update-assignee"
           data-day-id="${day.id}"
           data-meal-id="${meal.id}"
@@ -234,7 +249,7 @@ function renderIngredientRow(state, day, meal, ing) {
         />
       </span>
       ${
-        state.unlocked
+        canEdit(state)
           ? `<span class="icon-btn danger-hover" role="button" tabindex="0" style="padding:2px; color:#8A7F6C;" data-action="delete-ingredient" data-day-id="${day.id}" data-meal-id="${meal.id}" data-ing-id="${ing.id}" aria-label="Remove ingredient">&times;</span>`
           : ""
       }

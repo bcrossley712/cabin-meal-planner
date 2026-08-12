@@ -21,6 +21,7 @@ const state = {
   data: { updatedAt: null, trips: [] },
   view: { screen: "list", tripId: null }, // "list" | "trip"
   unlocked: false,
+  online: navigator.onLine,
   ui: {
     addingTrip: false,
     openDayIds: new Set(),
@@ -115,6 +116,13 @@ function showToast(message, isError) {
 /* ---------------- Mutations ---------------- */
 
 function mutateAndSave(fn) {
+  // Belt-and-suspenders: the UI shouldn't offer edit controls while
+  // offline at all (see render.js canEdit()), but guard here too in case
+  // connectivity drops in the instant between tap and handler running.
+  if (!state.online) {
+    renderApp(state);
+    return;
+  }
   fn();
   scheduleSave();
   renderApp(state);
@@ -186,6 +194,7 @@ function deleteIngredient(tripId, dayId, mealId, ingId) {
 }
 
 function updateAssignee(tripId, dayId, mealId, ingId, value) {
+  if (!state.online) return; // input is disabled while offline; this is a backstop
   // No re-render here on purpose — the input already shows what the user
   // typed. Re-rendering mid-keystroke would steal focus.
   const trip = state.data.trips.find((t) => t.id === tripId);
@@ -243,6 +252,7 @@ function handleAppClick(e) {
 
   switch (action) {
     case "toggle-lock":
+      if (!state.online) break; // button is disabled while offline; this is a backstop
       if (state.unlocked) {
         state.unlocked = false;
         renderApp(state);
@@ -430,6 +440,17 @@ function handleAppKeydown(e) {
   }
 }
 
+/* ---------------- Offline handling ---------------- */
+
+function updateOnlineStatus() {
+  state.online = navigator.onLine;
+  document.getElementById("offline-banner").hidden = state.online;
+  // Any add/edit/delete controls need to appear/disappear immediately —
+  // canEdit() in render.js checks state.online, so a re-render is enough.
+  renderApp(state);
+  if (state.online) refreshFromServer(true); // catch up on anything missed
+}
+
 /* ---------------- Init ---------------- */
 
 async function init() {
@@ -438,6 +459,9 @@ async function init() {
   document.getElementById("app").addEventListener("keydown", handleAppKeydown);
   document.getElementById("passcode-input").addEventListener("keydown", handleAppKeydown);
 
+  window.addEventListener("online", updateOnlineStatus);
+  window.addEventListener("offline", updateOnlineStatus);
+
   // Device already knows the passcode from a previous visit — unlock
   // optimistically. The next save/verify will confirm it's still correct.
   if (Storage.getPasscode()) state.unlocked = true;
@@ -445,14 +469,17 @@ async function init() {
   // Show cached data immediately so the app isn't blank while we fetch.
   const cached = Storage.getCachedData();
   if (cached) state.data = cached;
+  document.getElementById("offline-banner").hidden = state.online;
   renderApp(state);
 
   await refreshFromServer(true);
 
   // Poll for updates from other devices while the app is open.
-  setInterval(() => refreshFromServer(false), 20000);
+  setInterval(() => {
+    if (state.online) refreshFromServer(false);
+  }, 20000);
   document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) refreshFromServer(false);
+    if (!document.hidden && state.online) refreshFromServer(false);
   });
 }
 

@@ -95,6 +95,24 @@ not the public — low-stakes threat model, no need for real accounts.
   consistency and predictable contrast/accessibility.
 - **Mobile-only layout.** This will only ever be opened on a phone or
   tablet at a cabin — no desktop design work needed.
+- **Offline = strictly view-only, no queued/optimistic edits.** The app
+  shows the last-synced data (from `localStorage`, via `storage.js`)
+  and is fully navigable offline, but `canEdit()` in `render.js` hides
+  every add/edit/delete control whenever `state.online` is false,
+  regardless of whether the device is passcode-unlocked — matching the
+  fact that a cabin trip is exactly when there's no signal. This was a
+  deliberate simplification over queuing edits to sync later: an
+  earlier version let edits happen optimistically while offline and
+  retried saving in the background, which had a real bug (an edit made
+  offline and never flushed before the tab closed got silently
+  overwritten by the server's version on next load) and was confusing
+  regardless (looked like it saved, didn't). `main.js` also has
+  defensive `!state.online` guards in the mutation functions
+  themselves, not just hidden UI, in case connectivity drops between a
+  tap and the handler running. Uses the browser's standard
+  `navigator.onLine` / `online`/`offline` events — not bulletproof
+  (reflects "has a network interface," not "internet actually
+  reachable"), but adequate for "no signal at a cabin."
 - **Single source icon, generated into the full platform set.** One
   master image (1024×1024+) gets exported to: `apple-touch-icon.png`
   (180×180, iOS home screen), manifest icons at 192×192 and 512×512

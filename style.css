@@ -130,6 +130,10 @@ a:focus-visible {
   background: var(--surface-raised);
   color: #8FBF7F;
 }
+.lock-toggle:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
 .icon-btn {
   padding: 8px;
   color: var(--muted-on-dark);
@@ -441,6 +445,20 @@ a:focus-visible {
 }
 .modal-actions { display: flex; gap: 10px; margin-top: 4px; }
 .error-text { color: var(--danger-text); font-size: 14px; margin: -6px 0 10px; }
+
+/* ---------- Offline banner ---------- */
+.offline-banner {
+  position: sticky;
+  top: 0;
+  z-index: 120;
+  background: var(--surface-raised);
+  color: var(--muted-on-dark);
+  border-bottom: 1px solid var(--border-dark);
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 12px;
+}
 
 /* ---------- Update banner / sync toast ---------- */
 .update-banner {
