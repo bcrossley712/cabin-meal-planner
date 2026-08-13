@@ -120,6 +120,34 @@ not the public — low-stakes threat model, no need for real accounts.
   Share-sheet action a web page can't trigger or detect, so there's
   nothing to build for it. Dismissing the banner (or installing) sets a
   `localStorage` flag so it doesn't re-nag on every visit.
+- **Icons are inline SVG, never emoji — standing rule, not just past
+  cleanup.** Emoji render as a different picture per OS's own emoji
+  font (an Android "trash can" was once mistaken for a basketball
+  hoop) and completely ignore CSS `color`, which silently broke the
+  hover/danger-color styling on delete buttons for a while without
+  erroring. `render.js` has small `*IconSVG()` helpers (trash, lock,
+  user, utensils, tent) using `stroke="currentColor"` so they inherit
+  button color properly. Any future icon should follow this pattern,
+  not reach for an emoji character.
+- **Passcode input uses `autocomplete="one-time-code"`, deliberately
+  not `"off"`.** `off` looks like the obvious choice but Chrome doesn't
+  reliably honor it for a real `type="password"` field — it kept
+  offering to save the passcode as a login password. `one-time-code`
+  is a value Chrome specifically recognizes as "not a password to
+  save." Don't "simplify" this back to `off`.
+- **Every state-mutating action must route through `mutateAndSave()`
+  (or the equivalent `canEdit(state)` check).** This isn't just a
+  convenience wrapper — it's the actual enforcement point for
+  "locked/offline = no edits," independent of whether a given button
+  correctly hid itself. Learned this the hard way: the "+ New trip"
+  button was never gated by the lock at all from the very first build,
+  and tapping the lock icon to re-lock never even cleared the cached
+  passcode — so edits could still go through and sync while the UI
+  said "Locked." Fixed now (button gated via `canEdit(state)` in
+  `render.js`; `mutateAndSave()`/`updateAssignee()` in `main.js` check
+  `canEdit(state)` directly as a second, independent backstop) — but
+  if a new mutating action gets added later, make sure it goes through
+  one of these two, not a bespoke check.
 - **Single source icon, generated into the full platform set.** One
   master image (1024×1024+) gets exported to: `apple-touch-icon.png`
   (180×180, iOS home screen), manifest icons at 192×192 and 512×512

@@ -139,6 +139,9 @@ a:focus-visible {
   color: var(--muted-on-dark);
   font-size: 20px;
   line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 .icon-btn.danger-hover:active { color: var(--rust); }
 

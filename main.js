@@ -116,10 +116,11 @@ function showToast(message, isError) {
 /* ---------------- Mutations ---------------- */
 
 function mutateAndSave(fn) {
-  // Belt-and-suspenders: the UI shouldn't offer edit controls while
-  // offline at all (see render.js canEdit()), but guard here too in case
-  // connectivity drops in the instant between tap and handler running.
-  if (!state.online) {
+  // Belt-and-suspenders: the UI shouldn't offer edit controls unless
+  // canEdit(state) is true (see render.js) — this is the code-level
+  // backstop for that, in case some future button gets added without
+  // being properly gated (as happened once already with "+ New trip").
+  if (!canEdit(state)) {
     renderApp(state);
     return;
   }
@@ -194,7 +195,7 @@ function deleteIngredient(tripId, dayId, mealId, ingId) {
 }
 
 function updateAssignee(tripId, dayId, mealId, ingId, value) {
-  if (!state.online) return; // input is disabled while offline; this is a backstop
+  if (!canEdit(state)) return; // input is disabled in this state; this is a backstop
   // No re-render here on purpose — the input already shows what the user
   // typed. Re-rendering mid-keystroke would steal focus.
   const trip = state.data.trips.find((t) => t.id === tripId);

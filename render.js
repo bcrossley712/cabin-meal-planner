@@ -15,6 +15,38 @@ function escapeHtml(str) {
     .replace(/'/g, "&#039;");
 }
 
+// Emoji (🗑, etc.) render as a different picture per-OS emoji font and
+// ignore CSS `color` entirely — inline SVG instead renders identically on
+// iOS/Android and correctly inherits button color/hover states via
+// currentColor.
+function trashIconSVG(size) {
+  const s = size || 16;
+  return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>`;
+}
+
+function lockIconSVG(open, size) {
+  const s = size || 16;
+  const shackle = open
+    ? '<path d="M7 10V7a5 5 0 0 1 9.3-2.5"></path>'
+    : '<path d="M7 10V7a5 5 0 0 1 10 0v3"></path>';
+  return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block;"><rect x="4" y="10" width="16" height="10" rx="2"></rect>${shackle}</svg>`;
+}
+
+function userIconSVG(size) {
+  const s = size || 14;
+  return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block;"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-7 8-7s8 3 8 7"></path></svg>`;
+}
+
+function utensilsIconSVG(size) {
+  const s = size || 15;
+  return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block;"><path d="M7 2v6a2 2 0 0 1-4 0V2"></path><path d="M5 8v14"></path><path d="M17 2c-1.7 0-3 2-3 5s1.3 5 3 5"></path><path d="M17 2v20"></path></svg>`;
+}
+
+function tentIconSVG(size) {
+  const s = size || 18;
+  return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block;"><path d="M2 21L12 3l10 18"></path><path d="M9.5 21L12 15l2.5 6"></path><path d="M2 21h20"></path></svg>`;
+}
+
 function formatDate(iso) {
   if (!iso) return "—";
   const d = new Date(iso + "T00:00:00");
@@ -42,7 +74,7 @@ function lockToggleHTML(state, compact) {
     <button type="button" class="lock-toggle ${showUnlocked ? "unlocked" : ""}" data-action="toggle-lock" ${
     online ? "" : "disabled"
   }>
-      <span aria-hidden="true">${showUnlocked ? "🔓" : "🔒"}</span>
+      <span aria-hidden="true" style="display:flex;">${lockIconSVG(showUnlocked, 15)}</span>
       ${label ? `<span>${label}</span>` : ""}
     </button>`;
 }
@@ -70,7 +102,7 @@ function renderTripList(state) {
       return `
       <div class="trip-card">
         <button type="button" class="trip-card-main" data-action="select-trip" data-trip-id="${t.id}">
-          <span class="trip-icon-badge" aria-hidden="true">🏕️</span>
+          <span class="trip-icon-badge" aria-hidden="true">${tentIconSVG(18)}</span>
           <span style="flex:1; min-width:0;">
             <span class="trip-card-name" style="display:block;">${escapeHtml(t.name)}</span>
             <span class="trip-card-sub">${dayCount} day${dayCount !== 1 ? "s" : ""} planned</span>
@@ -78,7 +110,7 @@ function renderTripList(state) {
         </button>
         ${
           canEdit(state)
-            ? `<button type="button" class="icon-btn danger-hover" data-action="delete-trip" data-trip-id="${t.id}" aria-label="Delete trip">🗑</button>`
+            ? `<button type="button" class="icon-btn danger-hover" data-action="delete-trip" data-trip-id="${t.id}" aria-label="Delete trip">${trashIconSVG(18)}</button>`
             : ""
         }
       </div>`;
@@ -92,7 +124,9 @@ function renderTripList(state) {
         <button type="button" class="btn-primary" data-action="submit-add-trip">Add</button>
         <button type="button" class="icon-btn" data-action="cancel-add-trip" aria-label="Cancel">&times;</button>
       </div>`
-    : `<button type="button" class="dashed-btn" data-action="open-add-trip">+ New trip</button>`;
+    : canEdit(state)
+    ? `<button type="button" class="dashed-btn" data-action="open-add-trip">+ New trip</button>`
+    : "";
 
   return `
     <div class="screen-pad">
@@ -131,7 +165,7 @@ function renderTripScreen(state, trip) {
       <div class="trip-header-actions">
         ${
           canEdit(state)
-            ? `<button type="button" class="icon-btn danger-hover" data-action="delete-trip" data-trip-id="${trip.id}" aria-label="Delete trip">🗑</button>`
+            ? `<button type="button" class="icon-btn danger-hover" data-action="delete-trip" data-trip-id="${trip.id}" aria-label="Delete trip">${trashIconSVG(18)}</button>`
             : ""
         }
         ${lockToggleHTML(state, true)}
@@ -172,7 +206,7 @@ function renderDayCard(state, day) {
           <span class="meal-count">${meals.length} meal${meals.length !== 1 ? "s" : ""}</span>
           ${
             canEdit(state)
-              ? `<span class="icon-btn danger-hover" role="button" tabindex="0" data-action="delete-day" data-day-id="${day.id}" aria-label="Delete day" style="padding:4px;">🗑</span>`
+              ? `<span class="icon-btn danger-hover" role="button" tabindex="0" data-action="delete-day" data-day-id="${day.id}" aria-label="Delete day" style="padding:4px;">${trashIconSVG(16)}</span>`
               : ""
           }
         </span>
@@ -206,7 +240,7 @@ function renderMealCard(state, day, meal) {
       <button type="button" class="meal-card-header" data-action="toggle-meal" data-meal-id="${meal.id}">
         <span class="meal-card-header-left">
           <span aria-hidden="true">${isOpen ? "▾" : "▸"}</span>
-          <span aria-hidden="true">🍽</span>
+          <span aria-hidden="true" style="display:flex;">${utensilsIconSVG(14)}</span>
           <span class="meal-name">${escapeHtml(meal.name)}</span>
         </span>
         <span class="meal-card-header-right">
@@ -217,7 +251,7 @@ function renderMealCard(state, day, meal) {
           }
           ${
             canEdit(state)
-              ? `<span class="icon-btn danger-hover" role="button" tabindex="0" style="padding:4px; color:#8A7F6C;" data-action="delete-meal" data-meal-id="${meal.id}" data-day-id="${day.id}" aria-label="Delete meal">🗑</span>`
+              ? `<span class="icon-btn danger-hover" role="button" tabindex="0" style="padding:4px; color:#8A7F6C;" data-action="delete-meal" data-meal-id="${meal.id}" data-day-id="${day.id}" aria-label="Delete meal">${trashIconSVG(16)}</span>`
               : ""
           }
         </span>
@@ -235,7 +269,7 @@ function renderIngredientRow(state, day, meal, ing) {
     <div class="ingredient-row">
       <span class="ingredient-name">${escapeHtml(ing.name)}</span>
       <span style="display:flex; align-items:center; gap:4px;">
-        <span aria-hidden="true" style="font-size:12px;">👤</span>
+        <span aria-hidden="true" style="display:flex;">${userIconSVG(12)}</span>
         <input
           type="text"
           class="assignee-input"
