@@ -88,7 +88,7 @@ function renderTripList(state) {
   const addForm = state.ui.addingTrip
     ? `
       <div class="inline-form">
-        <input type="text" id="new-trip-name" class="text-input dark" placeholder="e.g. Thanksgiving Cabin" autofocus />
+        <input type="text" id="new-trip-name" class="text-input dark" placeholder="e.g. Thanksgiving Cabin" autocomplete="off" autofocus />
         <button type="button" class="btn-primary" data-action="submit-add-trip">Add</button>
         <button type="button" class="icon-btn" data-action="cancel-add-trip" aria-label="Cancel">&times;</button>
       </div>`
@@ -154,7 +154,7 @@ function renderDayCard(state, day) {
     ? addingMeal
       ? `
         <div class="inline-form pad-top">
-          <input type="text" id="new-meal-name-${day.id}" class="text-input dark" placeholder="e.g. Saturday Lunch" autofocus />
+          <input type="text" id="new-meal-name-${day.id}" class="text-input dark" placeholder="e.g. Saturday Lunch" autocomplete="off" autofocus />
           <button type="button" class="btn-primary small" data-action="submit-add-meal" data-day-id="${day.id}">Add</button>
           <button type="button" class="icon-btn" data-action="cancel-add-meal" data-day-id="${day.id}" aria-label="Cancel">&times;</button>
         </div>`
@@ -194,7 +194,7 @@ function renderMealCard(state, day, meal) {
     ? addingIng
       ? `
         <div class="inline-form pad-top">
-          <input type="text" id="new-ing-name-${meal.id}" class="text-input light" placeholder="e.g. Buns, 8 pack" autofocus />
+          <input type="text" id="new-ing-name-${meal.id}" class="text-input light" placeholder="e.g. Buns, 8 pack" autocomplete="off" autofocus />
           <button type="button" class="btn-danger small" data-action="submit-add-ingredient" data-meal-id="${meal.id}" data-day-id="${day.id}">Add</button>
           <button type="button" class="icon-btn" style="color:var(--ink-muted);" data-action="cancel-add-ingredient" data-meal-id="${meal.id}" aria-label="Cancel">&times;</button>
         </div>`
@@ -239,6 +239,7 @@ function renderIngredientRow(state, day, meal, ing) {
         <input
           type="text"
           class="assignee-input"
+          autocomplete="off"
           value="${escapeHtml(ing.assignee || "")}"
           placeholder="who's bringing?"
           ${canEdit(state) ? "" : "disabled"}

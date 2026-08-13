@@ -230,9 +230,11 @@ function closePasscodeModal() {
   document.getElementById("passcode-modal").hidden = true;
 }
 function submitPasscode() {
-  const value = document.getElementById("passcode-input").value;
+  const input = document.getElementById("passcode-input");
+  const value = input.value;
   if (!value) return;
   Storage.setPasscode(value);
+  input.value = ""; // don't leave the typed value sitting in the DOM after use
   state.unlocked = true;
   closePasscodeModal();
   renderApp(state);
