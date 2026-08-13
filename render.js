@@ -47,6 +47,11 @@ function tentIconSVG(size) {
   return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block;"><path d="M2 21L12 3l10 18"></path><path d="M9.5 21L12 15l2.5 6"></path><path d="M2 21h20"></path></svg>`;
 }
 
+function checkIconSVG(size) {
+  const s = size || 16;
+  return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><path d="M20 6L9 17l-5-5"></path></svg>`;
+}
+
 function formatDate(iso) {
   if (!iso) return "—";
   const d = new Date(iso + "T00:00:00");
@@ -245,8 +250,8 @@ function renderMealCard(state, day, meal) {
         </span>
         <span class="meal-card-header-right">
           ${
-            total > 0
-              ? `<span class="claimed-badge ${allClaimed ? "all" : "partial"} mono">${claimedCount}/${total} CLAIMED</span>`
+            total > 0 && allClaimed
+              ? `<span role="img" aria-label="All ingredients claimed" style="display:flex; color:var(--sage);">${checkIconSVG(16)}</span>`
               : ""
           }
           ${
@@ -268,25 +273,27 @@ function renderIngredientRow(state, day, meal, ing) {
   return `
     <div class="ingredient-row">
       <span class="ingredient-name">${escapeHtml(ing.name)}</span>
-      <span style="display:flex; align-items:center; gap:4px;">
-        <span aria-hidden="true" style="display:flex;">${userIconSVG(12)}</span>
-        <input
-          type="text"
-          class="assignee-input"
-          autocomplete="off"
-          value="${escapeHtml(ing.assignee || "")}"
-          placeholder="who's bringing?"
-          ${canEdit(state) ? "" : "disabled"}
-          data-action="update-assignee"
-          data-day-id="${day.id}"
-          data-meal-id="${meal.id}"
-          data-ing-id="${ing.id}"
-        />
+      <span class="ingredient-row-bottom">
+        <span style="display:flex; align-items:center; gap:4px; flex:1; min-width:0;">
+          <span aria-hidden="true" style="display:flex; flex-shrink:0;">${userIconSVG(12)}</span>
+          <input
+            type="text"
+            class="assignee-input"
+            autocomplete="off"
+            value="${escapeHtml(ing.assignee || "")}"
+            placeholder="who's bringing?"
+            ${canEdit(state) ? "" : "disabled"}
+            data-action="update-assignee"
+            data-day-id="${day.id}"
+            data-meal-id="${meal.id}"
+            data-ing-id="${ing.id}"
+          />
+        </span>
+        ${
+          canEdit(state)
+            ? `<span class="icon-btn danger-hover" role="button" tabindex="0" style="padding:2px; color:#8A7F6C;" data-action="delete-ingredient" data-day-id="${day.id}" data-meal-id="${meal.id}" data-ing-id="${ing.id}" aria-label="Remove ingredient">&times;</span>`
+            : ""
+        }
       </span>
-      ${
-        canEdit(state)
-          ? `<span class="icon-btn danger-hover" role="button" tabindex="0" style="padding:2px; color:#8A7F6C;" data-action="delete-ingredient" data-day-id="${day.id}" data-meal-id="${meal.id}" data-ing-id="${ing.id}" aria-label="Remove ingredient">&times;</span>`
-          : ""
-      }
     </div>`;
 }
