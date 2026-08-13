@@ -362,6 +362,22 @@ a:focus-visible {
 }
 .inline-form.pad-top { padding-top: 4px; }
 
+.meal-counter {
+  font-size: 12px;
+  color: var(--muted-on-dark);
+}
+.meal-counter.complete {
+  color: var(--sage);
+  font-weight: 600;
+}
+
+.meal-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.meal-actions-row.pad-top { padding-top: 4px; }
+
 .btn-primary {
   background: var(--brass);
   color: var(--pine);

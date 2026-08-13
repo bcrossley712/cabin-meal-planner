@@ -189,15 +189,26 @@ function renderDayCard(state, day) {
   const mealCards = meals.map((m) => renderMealCard(state, day, m)).join("");
 
   const addingMeal = state.ui.addingMealDayIds.has(day.id);
-  const addMealForm = canEdit(state)
+  const addMealForm = addingMeal
+    ? `
+      <div class="inline-form pad-top">
+        <input type="text" id="new-meal-name-${day.id}" class="text-input dark" placeholder="e.g. Saturday Lunch" autocomplete="off" autofocus />
+        <button type="button" class="btn-primary small" data-action="submit-add-meal" data-day-id="${day.id}">Add</button>
+        <button type="button" class="icon-btn" data-action="cancel-add-meal" data-day-id="${day.id}" aria-label="Cancel">&times;</button>
+      </div>`
+    : "";
+
+  // Delete-day only appears in the expanded body, next to "+ Add meal" —
+  // same reasoning as delete-meal: requires opening the day first, not a
+  // stray tap target next to the date.
+  const dayActionsRow = canEdit(state)
     ? addingMeal
-      ? `
-        <div class="inline-form pad-top">
-          <input type="text" id="new-meal-name-${day.id}" class="text-input dark" placeholder="e.g. Saturday Lunch" autocomplete="off" autofocus />
-          <button type="button" class="btn-primary small" data-action="submit-add-meal" data-day-id="${day.id}">Add</button>
-          <button type="button" class="icon-btn" data-action="cancel-add-meal" data-day-id="${day.id}" aria-label="Cancel">&times;</button>
+      ? addMealForm
+      : `
+        <div class="meal-actions-row pad-top">
+          <button type="button" class="link-btn on-dark" data-action="open-add-meal" data-day-id="${day.id}">+ Add meal</button>
+          <span class="icon-btn danger-hover" role="button" tabindex="0" data-action="delete-day" data-day-id="${day.id}" aria-label="Delete day" style="padding:4px;">${trashIconSVG(16)}</span>
         </div>`
-      : `<button type="button" class="link-btn on-dark" data-action="open-add-meal" data-day-id="${day.id}">+ Add meal</button>`
     : "";
 
   return `
@@ -209,14 +220,9 @@ function renderDayCard(state, day) {
         </span>
         <span class="day-card-header-right">
           <span class="meal-count">${meals.length} meal${meals.length !== 1 ? "s" : ""}</span>
-          ${
-            canEdit(state)
-              ? `<span class="icon-btn danger-hover" role="button" tabindex="0" data-action="delete-day" data-day-id="${day.id}" aria-label="Delete day" style="padding:4px;">${trashIconSVG(16)}</span>`
-              : ""
-          }
         </span>
       </button>
-      ${isOpen ? `<div class="day-card-body">${mealCards}${addMealForm}</div>` : ""}
+      ${isOpen ? `<div class="day-card-body">${mealCards}${dayActionsRow}</div>` : ""}
     </div>`;
 }
 
@@ -229,15 +235,27 @@ function renderMealCard(state, day, meal) {
   const rows = meal.ingredients.map((ing) => renderIngredientRow(state, day, meal, ing)).join("");
 
   const addingIng = state.ui.addingIngredientMealIds.has(meal.id);
-  const addIngForm = canEdit(state)
+  const addIngForm = addingIng
+    ? `
+      <div class="inline-form pad-top">
+        <input type="text" id="new-ing-name-${meal.id}" class="text-input light" placeholder="e.g. Buns, 8 pack" autocomplete="off" autofocus />
+        <button type="button" class="btn-danger small" data-action="submit-add-ingredient" data-meal-id="${meal.id}" data-day-id="${day.id}">Add</button>
+        <button type="button" class="icon-btn" style="color:var(--ink-muted);" data-action="cancel-add-ingredient" data-meal-id="${meal.id}" aria-label="Cancel">&times;</button>
+      </div>`
+    : "";
+
+  // Delete-meal only appears in the expanded body, next to "+ Add
+  // ingredient" — deliberately not in the collapsed header, so deleting a
+  // meal requires opening it first rather than being a stray tap target
+  // next to the meal name.
+  const mealActionsRow = canEdit(state)
     ? addingIng
-      ? `
-        <div class="inline-form pad-top">
-          <input type="text" id="new-ing-name-${meal.id}" class="text-input light" placeholder="e.g. Buns, 8 pack" autocomplete="off" autofocus />
-          <button type="button" class="btn-danger small" data-action="submit-add-ingredient" data-meal-id="${meal.id}" data-day-id="${day.id}">Add</button>
-          <button type="button" class="icon-btn" style="color:var(--ink-muted);" data-action="cancel-add-ingredient" data-meal-id="${meal.id}" aria-label="Cancel">&times;</button>
+      ? addIngForm
+      : `
+        <div class="meal-actions-row pad-top">
+          <button type="button" class="link-btn on-light" data-action="open-add-ingredient" data-meal-id="${meal.id}" data-day-id="${day.id}">+ Add ingredient</button>
+          <span class="icon-btn danger-hover" role="button" tabindex="0" style="padding:4px; color:#8A7F6C;" data-action="delete-meal" data-meal-id="${meal.id}" data-day-id="${day.id}" aria-label="Delete meal">${trashIconSVG(16)}</span>
         </div>`
-      : `<button type="button" class="link-btn on-light" data-action="open-add-ingredient" data-meal-id="${meal.id}" data-day-id="${day.id}">+ Add ingredient</button>`
     : "";
 
   return `
@@ -250,20 +268,15 @@ function renderMealCard(state, day, meal) {
         </span>
         <span class="meal-card-header-right">
           ${
-            total > 0 && allClaimed
-              ? `<span role="img" aria-label="All ingredients claimed" style="display:flex; color:var(--sage);">${checkIconSVG(16)}</span>`
-              : ""
-          }
-          ${
-            canEdit(state)
-              ? `<span class="icon-btn danger-hover" role="button" tabindex="0" style="padding:4px; color:#8A7F6C;" data-action="delete-meal" data-meal-id="${meal.id}" data-day-id="${day.id}" aria-label="Delete meal">${trashIconSVG(16)}</span>`
+            total > 0
+              ? `<span class="mono meal-counter ${allClaimed ? "complete" : ""}" aria-label="${claimedCount} of ${total} ingredients claimed">${claimedCount}/${total}</span>`
               : ""
           }
         </span>
       </button>
       ${
         isOpen
-          ? `<div class="meal-card-body">${rows}${addIngForm}</div>`
+          ? `<div class="meal-card-body">${rows}${mealActionsRow}</div>`
           : ""
       }
     </div>`;
